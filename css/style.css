@@ -1,0 +1,12 @@
+html, body
+{
+    margin:0;
+    padding:0;
+    overflow:hidden;
+}
+    #canvas-container 
+    {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
