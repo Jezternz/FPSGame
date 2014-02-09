@@ -1,6 +1,6 @@
 window.Player = WrapClass({
 
-    _PLAYER_CAMERA_HEIGHT: 0,
+    _maxYawY: 0,
 
     _program: false,
     _delta: 0,
@@ -39,7 +39,7 @@ window.Player = WrapClass({
         this._pitchObject.add(this._program.camera.threeCamera);
 
         this._yawObject = new THREE.Object3D();
-        this._yawObject.position.y = this._PLAYER_CAMERA_HEIGHT;
+        this._yawObject.position.y = this._maxYawY;
         this._yawObject.add(this._pitchObject);
 
         this._program.renderer.threeScene.add(this._yawObject);
@@ -77,7 +77,7 @@ window.Player = WrapClass({
 
         if (this.actions.movement.forward)
         {
-            this._velocity.z -= (this.actions.movement.run ? 0.24 : 0.12) * this._delta;
+            this._velocity.z -= (this.actions.movement.run ? 0.3 : 0.18) * this._delta;
         }
         if (this.actions.movement.backward)
         {
@@ -97,15 +97,11 @@ window.Player = WrapClass({
         this._yawObject.translateY(this._velocity.y);
         this._yawObject.translateZ(this._velocity.z);
 
-        // If camera gets below minimum height (including camera off the ground)
-        if (this._yawObject.position.y <= this._PLAYER_CAMERA_HEIGHT)
+        // If camera spins stop it???
+        if (this._yawObject.position.y <= this._maxYawY)
         {
-
-            // Put the player on the ground
-            this._yawObject.position.y = this._PLAYER_CAMERA_HEIGHT;
+            this._yawObject.position.y = this._maxYawY;
             this._velocity.y = 0;
-
-            //canJump = true;
 
         }
     },

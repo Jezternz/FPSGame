@@ -54,7 +54,7 @@ html, body
                     .menu-button
                     {
                         border: 1px solid #808080;
-                        background: #EFEFEF;
+                        background: #DFDFDF;
                         padding: 5px 10px;
                         color: #000;
                         font-family: verdana;
@@ -65,8 +65,13 @@ html, body
                         outline:none;
                         margin: 0 0 3px 0;
                     }
+                    .menu-button:hover 
+                    {
+                        background: #F1F1F1;
+                    }
                     .menu-button:active
                     {
                         box-shadow: none;
+                        background: #F1F1F1;
                         margin: 3px 0 0 0;
                     }
