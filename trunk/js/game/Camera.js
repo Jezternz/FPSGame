@@ -14,13 +14,12 @@ window.Camera = WrapClass({
 
         this.setupCamera();
         this.setupListeners();
-
     },
 
     setupCamera: function ()
     {
         this.threeCamera = new THREE.PerspectiveCamera(this._FIELD_OF_VIEW, this.aspectRatio(), this._RENDER_MIN_DISTANCE, this._RENDER_MAX_DISTANCE);
-        this.threeCamera.position.set(0, 150, 400);
+        this.threeCamera.position.set(0, 40, 0);
         this.threeCamera.rotation.set(0, 0, 0);
     },
 

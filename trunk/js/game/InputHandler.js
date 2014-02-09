@@ -9,31 +9,32 @@ window.InputHandler = WrapClass({
 
     tick: function(timeElapsed)
     {
-        this.tickMovement();
-        this.tickLook();
-
-        this._program.events.resetMouseMovement();
+        if (!this._program.menu.active)
+        {
+            this.tickMovement();
+            this.tickLook();
+        }
     },
 
     tickMovement: function()
     {
-        if (this._program.events.keyStatus['w'])
+        if (this._program.events.keyDown['w'])
         {
             this._program.player.actions.movement.forward = true;
         }
-        if (this._program.events.keyStatus['s'])
+        if (this._program.events.keyDown['s'])
         {
             this._program.player.actions.movement.backward = true;
         }
-        if (this._program.events.keyStatus['a'])
+        if (this._program.events.keyDown['a'])
         {
             this._program.player.actions.movement.left = true;
         }
-        if (this._program.events.keyStatus['d'])
+        if (this._program.events.keyDown['d'])
         {
             this._program.player.actions.movement.right = true;
         }
-        if (this._program.events.keyStatus['space'])
+        if (this._program.events.keyDown['space'])
         {
             this._program.player.actions.movement.jump = true;
         }

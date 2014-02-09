@@ -12,6 +12,8 @@
             height: 0
         },
 
+        menuActive: true,
+
         rootElement: false,
 
         events: false,
@@ -19,6 +21,7 @@
         renderer: false,
         player: false,
         inputs: false,
+        menu: false,
 
         init: function ()
         {
@@ -31,12 +34,14 @@
             this.renderer = new SceneRenderer();
             this.player = new Player();
             this.inputs = new InputHandler();
+            this.menu = new Menu();
 
             this.events.init(this);
             this.camera.init(this);
             this.renderer.init(this);
             this.player.init(this);
             this.inputs.init(this);
+            this.menu.init(this);
 
             this._lastTickTime = this._tickStartTime = Date.now();
             this.tick();
@@ -44,14 +49,26 @@
 
         tick: function ()
         {
-            this._tickStartTime = Date.now();
-            this._tickTime = this._tickStartTime - this._lastTickTime;
+            // Ensure next frame is fired as soon as processor is finished with any remaining work
             requestAnimationFrame(this.tick.bind(this));
 
+            // Calculate time difference since last tick
+            this._tickStartTime = Date.now();
+            this._tickTime = this._tickStartTime - this._lastTickTime;
+
+            // Inputs & Menu (If required)
             this.inputs.tick(this._tickTime);
+            this.menu.tick(this._tickTime);
+
+            // Player, world
             this.player.tick(this._tickTime);
             this.renderer.tick(this._tickTime);
 
+            // Reset tick state
+            this.events.resetEvents();
+            this.player.resetActions();
+
+            // Finally assign previous tick time to the current tick time (ready for the next tick)
             this._lastTickTime = this._tickStartTime;
         },
 

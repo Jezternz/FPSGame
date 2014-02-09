@@ -11,10 +11,13 @@
         <script src="js/libs/three.min.js"></script>
 
         <!-- tools (global scope) -->
+        <script src="js/tools/PointerLock.js"></script>
         <script src="js/tools/WrapClass.js"></script>
         <script src="js/tools/Events.js"></script>
+        <script src="js/tools/PollyFill.js"></script>
 
         <!-- program (program scope) -->
+        <script src="js/game/Menu.js"></script>
         <script src="js/game/EventHandler.js"></script>
         <script src="js/game/InputHandler.js"></script>
         <script src="js/game/Camera.js"></script>
@@ -28,6 +31,14 @@
     <body>
 
         <div id="canvas-container"></div>
-
+        <div id="menu-overlay">
+            <div class="menu-overlay-center">
+                <div class="menu-overlay-expanded">
+                    <span class="menu-center-popout">
+                        <button class="menu-button" id="button-play">Play</button>
+                    </span>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

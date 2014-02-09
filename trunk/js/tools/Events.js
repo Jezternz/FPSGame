@@ -2,32 +2,90 @@ window.Events = {
 
     _events: {},
 
-    add: function(type, fn)
+    _prefixes: ['', 'moz', 'webkit'],
+
+    getTarget: function(type)
     {
+        if(type === "resize")
+        {
+            return window;
+        } 
+        else
+        {
+            return document;
+        }
+    },
+
+    sanatizeType: function(type)
+    {
+        var prefixedType;
+        for(var i=0;i<this._prefixes.length;i++)
+        {
+            prefixedType = this._prefixes[i] + type;
+            if (('on' + prefixedType) in this.getTarget(type))
+            {
+                return prefixedType;
+            }
+        }
+        throw new Error("No matching event type '" + type + "'.");
+    },
+
+    add: function(a, b, c)
+    {
+        var target, type, fn;
+        if(arguments.length === 2)
+        {
+            target = this.getTarget(a);
+            type = a;
+            fn = b;
+        }
+        else
+        {
+            target = document.querySelector(a);
+            type = b;
+            fn = c;
+        }
+
+        type = this.sanatizeType(type);
         if (typeof this._events[type] === 'undefined')
         {
             this._events[type] = [];
         }
         this._events[type].push(fn);
-        window.addEventListener(type, this.eventOccured.bind(this), false);
+        target.addEventListener(type, this.eventOccured.bind(this), false);
     },
 
-    remove: function(type, fn)
+    remove: function(a, b, c)
     {
+        var target, type, fn;
+        if (arguments.length === 2)
+        {
+            target = this.getTarget(a);
+            type = a;
+            fn = b;
+        }
+        else
+        {
+            target = document.querySelector(a);
+            type = b;
+            fn = c;
+        }
+
         // clear all events
         if (arguments.length < 1)
         {
             for (var ttype in this._events)
             {
-                window.removeEventListener(ttype, this.eventOccured.bind(this), false);
+                this.getTarget(ttype).removeEventListener(ttype, this.eventOccured.bind(this), false);
                 delete this._events[ttype];
             }
             return;
         }
+        type = this.sanatizeType(type);
         // clear all events of a type
         if (arguments.length < 2)
         {
-            window.removeEventListener(type, this.eventOccured.bind(this), false);
+            this.getTarget(type).removeEventListener(type, this.eventOccured.bind(this), false);
             delete this._events[type];
             return;
         }
@@ -43,7 +101,7 @@ window.Events = {
         }
         if (this._events[type].length === 0)
         {
-            window.removeEventListener(type, this.eventOccured.bind(this), false);
+            this.getTarget(type).removeEventListener(type, this.eventOccured.bind(this), false);
             delete this._events[type];
         }
 

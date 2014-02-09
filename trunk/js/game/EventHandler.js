@@ -1,6 +1,8 @@
 window.EventHandler = WrapClass({
 
-    keyStatus: {},
+    keyDown: {},
+    keyPressed: {},
+
     mouseMovement: { x: 0, y: 0 },
 
     _keyMappings:
@@ -19,15 +21,10 @@ window.EventHandler = WrapClass({
         this.initDocumentListeners();
     },
 
-    destroy: function()
-    {
-        this.removeDocumentListeners();
-    },
-
     initDocumentListeners: function ()
     {
-        Events.add("keydown", this.keyDown.bind(this));
-        Events.add("keyup", this.keyUp.bind(this));
+        Events.add("keydown", this.onKeyDown.bind(this));
+        Events.add("keyup", this.onKeyUp.bind(this));
         Events.add("mousemove", this.mouseMove.bind(this));
     },
 
@@ -37,22 +34,20 @@ window.EventHandler = WrapClass({
         return (this._keyMappings[keyCode] != null ? this._keyMappings[keyCode] : String.fromCharCode(keyCode)).toLowerCase();
     },
 
-    keyDown: function (evt)
+    onKeyDown: function (evt)
     {
         var key = this.sanatizeKey(evt);
-        if (!this.keyStatus[key])
+        if (!this.keyDown[key])
         {
-            this.keyStatus[key] = true;
+            this.keyDown[key] = true;
+            this.keyPressed[key] = true;
         }
     },
 
-    keyUp: function (evt)
+    onKeyUp: function (evt)
     {
         var key = this.sanatizeKey(evt);
-        if (this.keyStatus[key])
-        {
-            this.keyStatus[key] = false;
-        }
+        delete this.keyDown[key];
     },
 
     mouseMove: function(event)
@@ -61,17 +56,17 @@ window.EventHandler = WrapClass({
         this.mouseMovement.y += event.movementY || event.mozMovementY || event.webkitMovementY || 0;
     },
 
-    resetMouseMovement: function()
+    resetEvents: function ()
     {
         this.mouseMovement.x = 0;
         this.mouseMovement.y = 0;
-    },
 
-    resetKeys: function()
-    {
-        for(var key in this.keyStatus)
+        for (var key in this.keyPressed)
         {
-            delete this.keyStatus[key];
+            if (this.keyPressed[key])
+            {
+                delete this.keyPressed[key];
+            }
         }
     }
 

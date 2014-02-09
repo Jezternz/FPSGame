@@ -10,3 +10,63 @@ html, body
         left: 0;
         top: 0;
     }
+    #menu-overlay
+    {
+        position:absolute;
+        left:0;
+        top:0;
+        right:0;
+        bottom:0;
+        background: rgba(255, 255, 255, 0.5);
+        margin: 0 auto;
+    }
+        .menu-overlay-center
+        {
+            position:absolute;
+            left:50%;
+            top:50%;
+            width:0;
+            height:0;
+        }
+            .menu-overlay-expanded 
+            {
+                position:absolute;
+                width:1000px;
+                height:1000px;
+                top:-500px;
+                left:-500px;
+                line-height:1000px;
+                text-align: center;
+            }
+                .menu-center-popout
+                {
+                    display:inline-block;
+                    vertical-align:middle;
+                    line-height: 100%;
+                    margin: 0 auto;
+                    width: 100px;
+                    background: #FFF;
+                    text-align: center;
+                    padding: 20px;
+                    border: 3px solid #696969;
+                    border-radius: 4px;
+                }
+                    .menu-button
+                    {
+                        border: 1px solid #808080;
+                        background: #EFEFEF;
+                        padding: 5px 10px;
+                        color: #000;
+                        font-family: verdana;
+                        font-size: 16px;
+                        text-shadow: 1px 1px 1px #DADADA;
+                        border-radius: 2px;
+                        box-shadow: 0px 3px 0px #808080;
+                        outline:none;
+                        margin: 0 0 3px 0;
+                    }
+                    .menu-button:active
+                    {
+                        box-shadow: none;
+                        margin: 3px 0 0 0;
+                    }

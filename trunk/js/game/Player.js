@@ -1,6 +1,6 @@
 window.Player = WrapClass({
 
-    _PLAYER_CAMERA_HEIGHT: 10,
+    _PLAYER_CAMERA_HEIGHT: 0,
 
     _program: false,
     _delta: 0,
@@ -69,9 +69,9 @@ window.Player = WrapClass({
         }
         
         // Process movement
-        if (this.actions.jump)
+        if (this.actions.movement.jump)
         {
-            this._velocity.y += 10;
+            this._velocity.y += 1;
         }
         if (this.actions.movement.forward)
         {
@@ -96,24 +96,16 @@ window.Player = WrapClass({
         this._yawObject.translateZ(this._velocity.z);
 
         // If camera gets below minimum height (including camera off the ground)
-        if (this._yawObject.position.y < this._PLAYER_CAMERA_HEIGHT)
+        if (this._yawObject.position.y <= this._PLAYER_CAMERA_HEIGHT)
         {
 
             // Put the player on the ground
             this._yawObject.position.y = this._PLAYER_CAMERA_HEIGHT;
-
-            // If player has hit the ground and still has negative velocity, stop the player from falling any further
-            if(this._velocity.y < 0)
-            {
-                this._velocity.y = 0;
-            }
+            this._velocity.y = 0;
 
             //canJump = true;
 
         }
-
-        // Finally reset action state
-        this.resetActions();
     },
 
     resetActions: function()
