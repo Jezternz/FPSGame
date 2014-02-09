@@ -34,9 +34,13 @@ window.InputHandler = WrapClass({
         {
             this._program.player.actions.movement.right = true;
         }
-        if (this._program.events.keyDown['space'])
+        if (this._program.events.keyPressed['space'])
         {
             this._program.player.actions.movement.jump = true;
+        }
+        if (this._program.events.keyDown['shift']) 
+        {
+            this._program.player.actions.movement.run = true;
         }
     },
 

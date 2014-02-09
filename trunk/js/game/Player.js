@@ -20,7 +20,8 @@ window.Player = WrapClass({
             backward: false,
             left: false,
             right: false,
-            jump: false
+            jump: false,
+            run: false
         },
         look:
         {
@@ -69,13 +70,14 @@ window.Player = WrapClass({
         }
         
         // Process movement
-        if (this.actions.movement.jump)
+        if (this.actions.movement.jump && this._yawObject.position.y === 0)
         {
-            this._velocity.y += 1;
+            this._velocity.y += 10;
         }
+
         if (this.actions.movement.forward)
         {
-            this._velocity.z -= 0.12 * this._delta;
+            this._velocity.z -= (this.actions.movement.run ? 0.24 : 0.12) * this._delta;
         }
         if (this.actions.movement.backward)
         {
@@ -115,6 +117,7 @@ window.Player = WrapClass({
         this.actions.movement.left = false;
         this.actions.movement.right = false;
         this.actions.movement.jump = false;
+        this.actions.movement.run = false;
         this.actions.look.x = 0;
         this.actions.look.y = 0;
     },
