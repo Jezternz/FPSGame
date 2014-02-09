@@ -1,11 +1,10 @@
 window.SceneRenderer = WrapClass({
     
-    threeCamera: false,
+    threeScene: false,
 
     _IMAGES_DIRECTORY: "textures/",
 
     _program: false,
-    _scene: false,
     _renderer: false,
 
     init: function (program)
@@ -19,12 +18,7 @@ window.SceneRenderer = WrapClass({
 
     tick: function (timeElapsed)
     {
-        this._renderer.render(this._scene, this._program.camera.threeCamera);
-    },
-
-    add: function(obj)
-    {
-        this._scene.add(obj);
+        this._renderer.render(this.threeScene, this._program.camera.threeCamera);
     },
 
     setupListeners: function()
@@ -34,13 +28,12 @@ window.SceneRenderer = WrapClass({
 
     setupScene: function ()
     {
-        this._scene = new THREE.Scene();
+        this.threeScene = new THREE.Scene();
 
         this.setupRenderer();
 
         this.setupFloor();
         this.setupSkybox();
-
     },
 
     setupRenderer: function ()
@@ -60,7 +53,7 @@ window.SceneRenderer = WrapClass({
         var floor = new THREE.Mesh(floorGeometry, floorMaterial);
         floor.position.y = 0;
         floor.rotation.x = Math.PI / 2;
-        this._scene.add(floor);
+        this.threeScene.add(floor);
     },
 
     setupSkybox: function()
@@ -71,7 +64,7 @@ window.SceneRenderer = WrapClass({
         var skyMaterial = new THREE.MeshFaceMaterial(materialArray);
         var skyGeometry = new THREE.CubeGeometry(5000, 5000, 5000);
         var skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
-        this._scene.add(skyBox);
+        this.threeScene.add(skyBox);
     },
 
     resized: function()

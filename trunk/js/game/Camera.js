@@ -4,6 +4,10 @@ window.Camera = WrapClass({
 
     _program: false,
 
+    _FIELD_OF_VIEW: 45,
+    _RENDER_MIN_DISTANCE: 0.1,
+    _RENDER_MAX_DISTANCE: 20000,
+
     init: function (program)
     {
         this._program = program;
@@ -15,9 +19,7 @@ window.Camera = WrapClass({
 
     setupCamera: function ()
     {
-        var VIEW_ANGLE = 45, ASPECT = this._program.screen.width / this._program.screen.height, NEAR = 0.1, FAR = 20000;
-        this.threeCamera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-        this._program.renderer.add(this.threeCamera);
+        this.threeCamera = new THREE.PerspectiveCamera(this._FIELD_OF_VIEW, this.aspectRatio(), this._RENDER_MIN_DISTANCE, this._RENDER_MAX_DISTANCE);
         this.threeCamera.position.set(0, 150, 400);
         this.threeCamera.rotation.set(0, 0, 0);
     },
@@ -29,9 +31,14 @@ window.Camera = WrapClass({
 
     resized: function ()
     {
-        this.threeCamera.aspect = this._program.screen.width / this._program.screen.height;
+        this.threeCamera.aspect = this.aspectRatio();
         this.threeCamera.updateProjectionMatrix();
-    }
+    },
+
+    aspectRatio: function()
+    {
+        return this._program.screen.width / this._program.screen.height;
+    }   
 
     /*
 

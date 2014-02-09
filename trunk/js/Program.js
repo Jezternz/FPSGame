@@ -15,8 +15,8 @@
         rootElement: false,
 
         events: false,
-        renderer: false,
         camera: false,
+        renderer: false,
         player: false,
         inputs: false,
 
@@ -27,14 +27,14 @@
             this.setupHandlers();
 
             this.events = new EventHandler();
-            this.renderer = new SceneRenderer();
             this.camera = new Camera();
+            this.renderer = new SceneRenderer();
             this.player = new Player();
             this.inputs = new InputHandler();
 
             this.events.init(this);
-            this.renderer.init(this);
             this.camera.init(this);
+            this.renderer.init(this);
             this.player.init(this);
             this.inputs.init(this);
 

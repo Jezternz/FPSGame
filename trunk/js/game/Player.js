@@ -35,11 +35,13 @@ window.Player = WrapClass({
         this._velocity = new THREE.Vector3();
 
         this._pitchObject = new THREE.Object3D();
-        this._pitchObject.add(this._program.renderer.threeCamera);
+        this._pitchObject.add(this._program.camera.threeCamera);
 
         this._yawObject = new THREE.Object3D();
-        this._yawObject.position.y = 10;
+        this._yawObject.position.y = this._PLAYER_CAMERA_HEIGHT;
         this._yawObject.add(this._pitchObject);
+
+        this._program.renderer.threeScene.add(this._yawObject);
 
         this.resetActions();
     },
@@ -47,20 +49,20 @@ window.Player = WrapClass({
     tick: function(tickTime)
     {
 
+        // delta is the time passed, movement needs to be multiplied by the time passed, as the times for each tick can be inconsistent, however movement must remain consistent
         this._delta = tickTime * 0.1;
 
         // surface _velocity slow down + gravity
         this._velocity.x += (-this._velocity.x) * 0.08 * this._delta;
         this._velocity.z += (-this._velocity.z) * 0.08 * this._delta;
-
         this._velocity.y -= 0.25 * this._delta;
 
         // Process updates to looking around
-        if (this.actions.look.x > 0)
+        if (this.actions.look.x !== 0)
         {
             this._yawObject.rotation.y -= this.actions.look.x * 0.002;
         }
-        if (this.actions.look.y > 0)
+        if (this.actions.look.y !== 0)
         {
             this._pitchObject.rotation.x -= this.actions.look.y * 0.002;
             this._pitchObject.rotation.x = Math.max(-this._PI_2, Math.min(this._PI_2, this._pitchObject.rotation.x));
@@ -88,17 +90,23 @@ window.Player = WrapClass({
             this._velocity.x += 0.12 * this._delta;
         }
 
-
         // Update _yawObject based on _velocity changes
         this._yawObject.translateX(this._velocity.x);
         this._yawObject.translateY(this._velocity.y);
         this._yawObject.translateZ(this._velocity.z);
 
+        // If camera gets below minimum height (including camera off the ground)
         if (this._yawObject.position.y < this._PLAYER_CAMERA_HEIGHT)
         {
 
-            this._velocity.y = 0;
+            // Put the player on the ground
             this._yawObject.position.y = this._PLAYER_CAMERA_HEIGHT;
+
+            // If player has hit the ground and still has negative velocity, stop the player from falling any further
+            if(this._velocity.y < 0)
+            {
+                this._velocity.y = 0;
+            }
 
             //canJump = true;
 
@@ -117,6 +125,15 @@ window.Player = WrapClass({
         this.actions.movement.jump = false;
         this.actions.look.x = 0;
         this.actions.look.y = 0;
+    },
+
+    getPosition: function (vec3)
+    {
+        vec3 = tvec3 || new THREE.Vector3();
+        var rotation = new THREE.Euler(0, 0, 0, "YXZ");
+        rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
+        vec3.copy(new THREE.Vector3(0, 0, -1)).applyEuler(rotation);
+        return vec3;
     }
 
 
