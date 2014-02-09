@@ -1,6 +1,7 @@
-window.KeyBoardHandler = WrapClass({
+window.EventHandler = WrapClass({
 
     keyStatus: {},
+    mouseMovement: { x: 0, y: 0 },
 
     _keyMappings:
     {
@@ -25,8 +26,9 @@ window.KeyBoardHandler = WrapClass({
 
     initDocumentListeners: function ()
     {
-        EventHandler.add("keydown", this.keyDown.bind(this));
-        EventHandler.add("keyup", this.keyUp.bind(this));
+        Events.add("keydown", this.keyDown.bind(this));
+        Events.add("keyup", this.keyUp.bind(this));
+        Events.add("mousemove", this.mouseMove.bind(this));
     },
 
     sanatizeKey: function (evt)
@@ -53,7 +55,19 @@ window.KeyBoardHandler = WrapClass({
         }
     },
 
-    clear: function()
+    mouseMove: function(event)
+    {
+        this.mouseMovement.x += event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        this.mouseMovement.y += event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    },
+
+    resetMouseMovement: function()
+    {
+        this.mouseMovement.x = 0;
+        this.mouseMovement.y = 0;
+    },
+
+    resetKeys: function()
     {
         for(var key in this.keyStatus)
         {

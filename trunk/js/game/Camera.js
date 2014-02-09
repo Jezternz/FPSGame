@@ -1,5 +1,5 @@
-window.FPSCamera = WrapClass({
-    
+window.Camera = WrapClass({
+
     threeCamera: false,
 
     _program: false,
@@ -13,7 +13,7 @@ window.FPSCamera = WrapClass({
 
     },
 
-    setupCamera: function()
+    setupCamera: function ()
     {
         var VIEW_ANGLE = 45, ASPECT = this._program.screen.width / this._program.screen.height, NEAR = 0.1, FAR = 20000;
         this.threeCamera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
@@ -22,16 +22,20 @@ window.FPSCamera = WrapClass({
         this.threeCamera.rotation.set(0, 0, 0);
     },
 
-    setupListeners: function()
+    setupListeners: function ()
     {
-        EventHandler.add('resize', this.resized.bind(this));
+        Events.add('resize', this.resized.bind(this));
     },
 
-    resized: function()
+    resized: function ()
     {
-        this._camera.aspect = this._program.screen.width / this._program.screen.height;
-        this._camera.updateProjectionMatrix();
+        this.threeCamera.aspect = this._program.screen.width / this._program.screen.height;
+        this.threeCamera.updateProjectionMatrix();
     }
+
+    /*
+
+    */
 
 
 });

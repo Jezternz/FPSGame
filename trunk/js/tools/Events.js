@@ -1,4 +1,4 @@
-window.EventHandler = {
+window.Events = {
 
     _events: {},
 

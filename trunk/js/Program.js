@@ -1,9 +1,10 @@
 {
-    var Program = {
+    window.Program = {
 
         _lastTickTime: 0,
+        _tickStartTime: 0,
+
         _tickTime: 0,
-        _timeElapsed: 0,
 
         screen:
         {
@@ -13,9 +14,10 @@
 
         rootElement: false,
 
-        keyboard: false,
+        events: false,
         renderer: false,
         camera: false,
+        player: false,
         inputs: false,
 
         init: function ()
@@ -24,35 +26,38 @@
             this.calculateScreenDimensions();
             this.setupHandlers();
 
-            this.keyboard = new KeyBoardHandler();
+            this.events = new EventHandler();
             this.renderer = new SceneRenderer();
-            this.camera = new FPSCamera();
+            this.camera = new Camera();
+            this.player = new Player();
             this.inputs = new InputHandler();
 
-            this.keyboard.init(this);
+            this.events.init(this);
             this.renderer.init(this);
             this.camera.init(this);
+            this.player.init(this);
             this.inputs.init(this);
 
-            this._lastTickTime = this._tickTime = Date.now();
+            this._lastTickTime = this._tickStartTime = Date.now();
             this.tick();
         },
 
         tick: function ()
         {
-            this._tickTime = Date.now();
-            this._timeElapsed = this._tickTime - this._lastTickTime;
+            this._tickStartTime = Date.now();
+            this._tickTime = this._tickStartTime - this._lastTickTime;
             requestAnimationFrame(this.tick.bind(this));
 
-            this.inputs.tick(this._timeElapsed);
-            this.renderer.tick(this._timeElapsed);
+            this.inputs.tick(this._tickTime);
+            this.player.tick(this._tickTime);
+            this.renderer.tick(this._tickTime);
 
-            this._lastTickTime = this._tickTime;
+            this._lastTickTime = this._tickStartTime;
         },
 
         setupHandlers: function()
         {
-            EventHandler.add('resize', this.resized.bind(this));
+            Events.add('resize', this.resized.bind(this));
         },
 
         resized: function ()
@@ -67,5 +72,5 @@
         }
 
     };
-    window.start = Program.init.bind(Program);
+    window.start = window.Program.init.bind(window.Program);
 }

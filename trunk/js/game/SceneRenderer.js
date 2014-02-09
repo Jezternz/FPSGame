@@ -29,7 +29,7 @@ window.SceneRenderer = WrapClass({
 
     setupListeners: function()
     {
-        EventHandler.add('resize', this.resized.bind(this));
+        Events.add('resize', this.resized.bind(this));
     },
 
     setupScene: function ()
