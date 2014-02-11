@@ -2,7 +2,7 @@
     var copy = function (obj)
     {
         if (null == obj || "object" != typeof obj) return obj;
-        var c = {};
+        var c = Array.isArray(obj) ? [] : {};
         for (var attr in obj)
         {
             if (obj.hasOwnProperty(attr)) c[attr] = copy(obj[attr]);

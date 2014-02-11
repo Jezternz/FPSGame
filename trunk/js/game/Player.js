@@ -1,6 +1,6 @@
 window.Player = WrapClass({
 
-    _maxYawY: 0,
+    _minPlayerHeight: 40,
 
     _program: false,
     _delta: 0,
@@ -39,7 +39,7 @@ window.Player = WrapClass({
         this._pitchObject.add(this._program.camera.threeCamera);
 
         this._yawObject = new THREE.Object3D();
-        this._yawObject.position.y = this._maxYawY;
+        this._yawObject.position.y = this._minPlayerHeight;
         this._yawObject.add(this._pitchObject);
 
         this._program.renderer.threeScene.add(this._yawObject);
@@ -70,14 +70,14 @@ window.Player = WrapClass({
         }
         
         // Process movement
-        if (this.actions.movement.jump && this._yawObject.position.y === 0)
+        if (this.actions.movement.jump && this._yawObject.position.y === this._minPlayerHeight)
         {
             this._velocity.y += 10;
         }
 
         if (this.actions.movement.forward)
         {
-            this._velocity.z -= (this.actions.movement.run ? 0.3 : 0.18) * this._delta;
+            this._velocity.z -= (this.actions.movement.run ? 0.4 : 0.2) * this._delta;
         }
         if (this.actions.movement.backward)
         {
@@ -97,10 +97,10 @@ window.Player = WrapClass({
         this._yawObject.translateY(this._velocity.y);
         this._yawObject.translateZ(this._velocity.z);
 
-        // If camera spins stop it???
-        if (this._yawObject.position.y <= this._maxYawY)
+        // Prevent player from falling off the map (limit player by surface)
+        if (this._yawObject.position.y <= this._minPlayerHeight)
         {
-            this._yawObject.position.y = this._maxYawY;
+            this._yawObject.position.y = this._minPlayerHeight;
             this._velocity.y = 0;
 
         }

@@ -51,6 +51,16 @@ html, body
                     border: 3px solid #696969;
                     border-radius: 4px;
                 }
+                    .menu-title
+                    {
+                        display: block;
+                        font-family: arial;
+                        letter-spacing: -2px;
+                        font-size: 24px;
+                        margin-bottom: 14px;
+                        color: #0C0C0C;
+                        text-shadow: 1px 1px 5px #808080;
+                    }
                     .menu-button
                     {
                         border: 1px solid #808080;

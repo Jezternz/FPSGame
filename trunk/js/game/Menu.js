@@ -24,12 +24,18 @@ window.Menu = WrapClass({
     {
         Events.add('pointerlockchange', this.pointerLockChanged.bind(this));
         Events.add('#button-play', 'click', this.playButtonPressed.bind(this));
+        Events.add('#form-menu', 'submit', this.preventDefault);
     },
 
     playButtonPressed: function()
     {
         this.active = false;
         this.updateMenuState();
+    },
+
+    preventDefault: function (evt)
+    {
+        evt.preventDefault();
     },
 
     pointerLockChanged: function(event)
@@ -44,7 +50,11 @@ window.Menu = WrapClass({
     updateMenuState: function ()
     {
         this.updateMenuDOM();
-        if (!this.active)
+        if (this.active)
+        {
+            document.getElementById('button-play').focus();
+        }
+        else (!this.active)
         {
             requestPointerLock(document.body);
         }
