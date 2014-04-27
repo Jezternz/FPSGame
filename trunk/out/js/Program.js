@@ -1,3 +1,4 @@
+"use strict";
 {
     window.Program = {
 
@@ -5,6 +6,8 @@
         _tickStartTime: 0,
 
         _tickTime: 0,
+
+        imagesDirectory: "textures/",
 
         screen:
         {
@@ -19,6 +22,7 @@
         events: false,
         camera: false,
         renderer: false,
+        objects: false,
         player: false,
         inputs: false,
         menu: false,
@@ -32,6 +36,7 @@
             this.events = new EventHandler();
             this.camera = new Camera();
             this.renderer = new SceneRenderer();
+            this.objects = new GameObjectStore();
             this.player = new Player();
             this.inputs = new InputHandler();
             this.menu = new Menu();
@@ -39,9 +44,12 @@
             this.events.init(this);
             this.camera.init(this);
             this.renderer.init(this);
+            this.objects.init(this);
             this.player.init(this);
             this.inputs.init(this);
             this.menu.init(this);
+
+            this.addObjects();
 
             this._lastTickTime = this._tickStartTime = Date.now();
             this.tick();
@@ -70,6 +78,13 @@
 
             // Finally assign previous tick time to the current tick time (ready for the next tick)
             this._lastTickTime = this._tickStartTime;
+        },
+
+        addObjects: function()
+        {
+            this.objects.add(new Skybox());
+            this.objects.add(new Terrain());
+            this.objects.add(new PlayerSelf());
         },
 
         setupHandlers: function()
