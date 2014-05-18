@@ -13,7 +13,8 @@
         {
             this._program = prog;
             this._essentials = {
-                "imagesDirectory": this._program.imagesDirectory
+                "imagesDirectory": this._program.imagesDirectory,
+                "jsonLoader": this._program.jsonLoader
             };
         },
 
@@ -33,15 +34,39 @@
             }
 
             // Add to three scene if renderable
+            this.isRenderable(obj);
+
+            // Add to array
+            this._storeAr.push(obj);
+            this._storeArLen = this._storeAr.length;
+        },
+
+        isRenderable: function(obj)
+        {
             var renderable = obj.getRenderable();
             if (renderable)
             {
                 this._program.renderer.threeScene.add(renderable);
             }
+        },
 
-            // Add to array
-            this._storeAr.push(obj);
-            this._storeArLen = this._storeAr.length;
+        ready: function()
+        {
+            var _this = this;
+            var initPromises = this._storeAr
+                .filter(function(obj){ return typeof obj.initAsync === "function"; })
+                .map(function(obj)
+                    { 
+                        return new Promise(function(resolve, reject)
+                        { 
+                            obj.initAsync(_this._essentials, function()
+                            {
+                                _this.isRenderable(obj);
+                                resolve();
+                            }); 
+                        }); 
+                    });
+            return Promise.all(initPromises);
         },
 
         tickRender: function ()
@@ -50,16 +75,7 @@
             {
                 this._storeAr[i].tickRender();
             }
-        },
-
-        tickPhysics: function ()
-        {
-            for (var i = 0; i < this._storeArLen; i++)
-            {
-                this._storeAr[i].tickPhysics();
-            }
         }
-
 
     });
 }

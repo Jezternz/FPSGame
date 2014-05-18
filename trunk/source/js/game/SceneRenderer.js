@@ -10,13 +10,6 @@
         _controlPoints: [],
         _playerBoundingBox: false,
 
-        _teamColors:
-        {
-            '0': 0xffffcc,
-            '1': 0x9999ff,
-            '2': 0xff9999
-        },
-
         init: function (program)
         {
             this._program = program;
@@ -40,7 +33,6 @@
         {
             this.threeScene = new THREE.Scene();
             this.setupRenderer();
-
             this.setupPlayerBoundingbox();
         },
 
@@ -54,7 +46,7 @@
         setupPlayerBoundingbox: function ()
         {
             var cubeGeometry = new THREE.CubeGeometry(20, 60, 20, 1, 1, 1);
-            var wireMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+            var wireMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
             this._playerBoundingBox = new THREE.Mesh(cubeGeometry, wireMaterial);
             this._playerBoundingBox.position.set(0, 0, 0);
             this.threeScene.add(this._playerBoundingBox);
