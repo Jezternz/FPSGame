@@ -17,7 +17,7 @@
 
         _PI_2: (Math.PI / 2),
 
-        _gravityAcceleration: 0.0025,
+        _gravityAcceleration: 0.005,
 
         // Defaults must be set in resetActions()
         actions:
@@ -58,6 +58,17 @@
             this.resetActions();
         },
 
+        tick: function (tickTime)
+        {
+            // delta is the time passed, movement needs to be multiplied by the time passed, as the times for each tick can be inconsistent, however movement must remain consistent
+            this._delta = tickTime * 0.1;
+
+            this.computeNextPosition(tickTime);
+            this.testCollisions();
+            this.resolveCollisions();
+
+        },
+
         computeNextPosition: function(tickTime)
         {
             // surface _velocity slow down + gravity
@@ -72,36 +83,39 @@
             // Process movement
             if (this.actions.movement.jump /*&& this._yawObject.position.y === this._minPlayerHeight*/)
             {
-                this._velocity.y += 0.05;
+                this._velocity.y += 0.03;
             }
 
             if (this.actions.movement.forward)
             {
-                this._velocity.z -= (this.actions.movement.run ? 1.6 : 0.8) * this._delta;
+                this._velocity.z -= (this.actions.movement.run ? 0.4 : 0.2) * this._delta;
             }
             if (this.actions.movement.backward)
             {
-                this._velocity.z += 0.6 * this._delta
+                this._velocity.z += 0.2 * this._delta
             }
             if (this.actions.movement.left)
             {
-                this._velocity.x -= 0.6 * this._delta;
+                this._velocity.x -= 0.2 * this._delta;
             }
             if (this.actions.movement.right)
             {
-                this._velocity.x += 0.6 * this._delta;
+                this._velocity.x += 0.2 * this._delta;
             }
         },
 
         testCollisions: function()
         {
             this._collisions.length = 0;
-            var playerAABB = [this._yawObject.position.x+this._velocity.x, this._yawObject.position.y+this._velocity.y, this._yawObject.position.z+this._velocity.z, 20, 60, 20];
-            if(this._program.physics.testAABBAgainstLevelGeometry(playerAABB))
-            {
-                this._collisions.push(1);
-            }
-            if(this._yawObject.position.y+this._velocity.y<0)
+
+            var newPos = [this._yawObject.position.x+this._velocity.x, this._yawObject.position.y+this._velocity.y, this._yawObject.position.z+this._velocity.z];
+            var size = [20, 60, 20].map(function(r){ return r/2; });
+            // PosX PosX2 PosY PosY2 PosZ PosZ2
+            var playerAABB = [newPos[0]-size[0], newPos[0]+size[0], newPos[1]-size[1], newPos[1]+size[1], newPos[2]-size[2], newPos[2]+size[2]];
+
+            this._collisions = this._program.physics.calculateAABBAgainstGeometryCollisions(playerAABB);
+
+            if(this._yawObject.position.y+this._velocity.y<-400)
             {
                 this._collisions.push(1);
             }
@@ -111,12 +125,13 @@
         {
 
             // Update _yawObject based on _velocity changes
-            this._yawObject.rotation.y += this._lookVelocity.y;
-            this._pitchObject.rotation.x += this._lookVelocity.x;
-            this._pitchObject.rotation.x = Math.max(-this._PI_2, Math.min(this._PI_2, this._pitchObject.rotation.x));
 
             if(this._collisions.length === 0)
             {
+                this._yawObject.rotation.y += this._lookVelocity.y;
+                this._pitchObject.rotation.x += this._lookVelocity.x;
+                this._pitchObject.rotation.x = Math.max(-this._PI_2, Math.min(this._PI_2, this._pitchObject.rotation.x));
+                
                 this._yawObject.translateY(this._velocity.y);
                 this._yawObject.translateX(this._velocity.x);
                 this._yawObject.translateZ(this._velocity.z);
@@ -129,30 +144,6 @@
             }
 
         },
-
-        tick: function (tickTime)
-        {
-            // delta is the time passed, movement needs to be multiplied by the time passed, as the times for each tick can be inconsistent, however movement must remain consistent
-            this._delta = tickTime * 0.1;
-
-            this.computeNextPosition(tickTime);
-            this.testCollisions();
-            this.resolveCollisions();
-
-            this.updatePlayerHitbox();
-
-        },
-
-        updatePlayerHitbox: function()
-        {
-
-            var r = this._program.renderer;
-            r._playerBoundingBox.position.x = this._yawObject.position.x;
-            r._playerBoundingBox.position.y = this._yawObject.position.y - 10;
-            r._playerBoundingBox.position.z = this._yawObject.position.z;
-
-        },
-
 
         resetActions: function ()
         {

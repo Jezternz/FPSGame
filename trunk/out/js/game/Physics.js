@@ -46,21 +46,25 @@
             }.bind(this));
         },
 
-        testAABBAgainstLevelGeometry: function(aabb)
+        calculateAABBAgainstGeometryCollisions: function(aabb)
         {
+            // NEED TO GO ACROSS ALL AABB's at some point and make them consistent. -- Make them Float32Ar ?
+
             var
                 name,
                 cellAABB = this.translateCoordinatesAABBToCellsAABB(aabb),
                 xCell=cellAABB[0],
-                xCellMax=cellAABB[3],
-                yCell=cellAABB[1],
-                yCellMax=cellAABB[4],
-                zCell=cellAABB[2],
+                xCellMax=cellAABB[1],
+                yCell=cellAABB[2],
+                yCellMax=cellAABB[3],
+                zCell=cellAABB[4],
                 zCellMax=cellAABB[5];
 
-                //console.log('->', cellAABB);
-
             var checks = [];
+
+
+            var rAr = [];
+
             // Loop through all cells
             for(var x=xCell;x <= xCellMax;x++)
             {
@@ -70,13 +74,13 @@
                     {
                         // If there are faces in the cell, loop through them
                         name = x+this.divider+y+this.divider+z;
+                        rAr.push(name);
                         if(typeof this.grid[name] !== "undefined")
                         {
                             for(var i=0;i<this.grid[name].length;i++)
                             {
                                 if(checks.indexOf(this.grid[name][i]) === -1)
                                 {
-                                    return true;
                                     checks.push(this.grid[name][i]);
                                 }
                             }
@@ -86,24 +90,100 @@
                 }                
             }
 
-                    //console.log("Collision check " + checks.length);
-
             // loop through faces and test collisions.
-            /*for(var j=0;j<checks.length;j++)
+            var collisions = [];
+            for(var j=0;j<checks.length;j++)
             {
-                var face = this.faces[checks[j]];
-                    face = [this.vertices[face[0]], this.vertices[face[1]], this.vertices[face[2]]];
-                var aabb2 = [aabb[0], aabb[1], aabb[2]];
-                var sizes = [aabb[3], aabb[4], aabb[5]];
-                if(this.physicsHelper.triangleIntersectsAABB(face, aabb2, sizes))
+                var faceIndices = this.faces[checks[j]];
+                var face = [this.vertices[faceIndices[0]], this.vertices[faceIndices[1]], this.vertices[faceIndices[2]]];
+
+                var aabb2 = [
+                    ((aabb[0]+aabb[1])/2),
+                    ((aabb[2]+aabb[3])/2),
+                    ((aabb[4]+aabb[5])/2),
+                    ((aabb[0] > aabb[1])? aabb[0]-aabb[1] : aabb[1]-aabb[0]) /2,
+                    ((aabb[2] > aabb[3])? aabb[2]-aabb[3] : aabb[3]-aabb[2]) /2,
+                    ((aabb[4] > aabb[5])? aabb[4]-aabb[5] : aabb[5]-aabb[4]) /2
+                ];
+
+                // Format actual central pos x y z size x y z
+                if(this.physicsHelper.aabbIntersectsTriangle(aabb2, face))
                 {
-                    console.log("Collision!");
-                    return true;
+                    collisions.push(checks[j]);
                 }
-            }*/
-            return false;
+            }
+
+            this.addUserHitBoxRendering(aabb, cellAABB, rAr, checks, collisions);
+
+            return collisions;
 
         },
+
+        addUserHitBoxRendering: function(playerAABB, playerCellsAABB, overlappingCells, overlappingFaces, actualCollisionFaces)
+        {
+            if(this.updateFlat || ((typeof this.lastHappen !== "undefined") && (this.lastHappen+100 > performance.now())))
+            {
+                return;
+            }       
+            this.lastHappen = performance.now();
+            playerAABB = playerAABB.map(function(aa, i){return (aa).toFixed(3);});
+            if(this.rAr)
+            {
+                this.rAr.forEach(function(box){ this._program.renderer.threeScene.remove(box); }.bind(this));
+            }
+            document.querySelector("#stats").innerHTML = 
+                "CellSize:<br />" + this.cellSize + "<br /><br />" +
+                "OriginalAABB<br />" + playerAABB.join(", ") + "<br /><br />"+
+                "CellsAABB:<br />" + playerCellsAABB.join(", ") + "<br /><br />" +
+                "OverlappingCellsList:<br />" + overlappingCells.join(", ") + "<br /><br />" +
+                "PossibleOverlappingFaceList (" + overlappingFaces.length + "):<br />" + overlappingFaces.join(", ") + "<br /><br />" +
+                "ActualOverlappingFaceList (" + actualCollisionFaces.length + "):<br />" + actualCollisionFaces.join(", ");
+            if(typeof this.statsListenerSet==="undefined")
+            {
+                document.addEventListener("keydown", function(evt){ 
+                    // pressing or q
+                    if(evt.which === 81){ this.updateFlat = !this.updateFlat; }; 
+                }.bind(this), false);
+                this.statsListenerSet = true;
+            }
+
+            this.updatePlayerBoundingBox.apply(this, playerAABB.map(function(num){ return parseFloat(num); }));
+
+            this.rAr = [];
+            var half=(this.cellSize/2);
+            overlappingCells.forEach(function(key)
+            {
+                var pos = key.split(this.divider);
+                var geometry = new THREE.CubeGeometry(this.cellSize, this.cellSize, this.cellSize, 1, 1, 1);
+                var material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+                var box = new THREE.Mesh(geometry, material);
+                box.position.set((pos[0]*this.cellSize)+half, (pos[1]*this.cellSize)+half, (pos[2]*this.cellSize)+half);
+                this._program.renderer.threeScene.add(box);
+                this.rAr.push(box);
+            }.bind(this));
+        },
+
+        updatePlayerBoundingBox: function(x, x2, y, y2, z, z2)
+        {
+
+            x = ((x + x2) / 2);
+            y = ((y + y2) / 2);
+            z = ((z + z2) / 2);
+
+            if(!this.playerBoundingBox)
+            {
+                var cubeGeometry = new THREE.CubeGeometry(20, 60, 20, 1, 1, 1);
+                var wireMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+                this.playerBoundingBox = new THREE.Mesh(cubeGeometry, wireMaterial);
+                this.playerBoundingBox.position.set(0, 0, 0);
+                this._program.renderer.threeScene.add(this.playerBoundingBox);
+            }
+            this.playerBoundingBox.position.x = x;
+            this.playerBoundingBox.position.y = y;
+            this.playerBoundingBox.position.z = z;
+        },
+
+
 
         addHitboxRendering: function()
         {
@@ -210,6 +290,7 @@
             ];
         },
 
+        // AABB is currently lowerX, upperX, lowerY, upperY, lowerZ, upperZ
         translateCoordinatesAABBToCellsAABB: function(aabb)
         {
             var temp, aabbOut = aabb.map(function(n){ return n/this.cellSize; }.bind(this));
@@ -255,8 +336,19 @@
             return matchingCells.filter(function(aabb)
             {
                 var sFace = face.map(function(vI){ return this.vertices[vI]; }.bind(this));
-                var cellSize = [this.cellSize, this.cellSize, this.cellSize];
-                return this.physicsHelper.triangleIntersectsAABB(sFace, aabb, cellSize);
+
+                // AABB is X-center-point, Y-center-point, Z-center-point, x-half-size, y-half-size, z-half-size
+                var halfSize = this.cellSize/2;
+                var completeAABB = [
+                    ((aabb[0]*this.cellSize)+halfSize), 
+                    ((aabb[1]*this.cellSize)+halfSize), 
+                    ((aabb[2]*this.cellSize)+halfSize), 
+                    halfSize, 
+                    halfSize, 
+                    halfSize
+                ];
+
+                return this.physicsHelper.aabbIntersectsTriangle(completeAABB, sFace);
             }.bind(this));
         }
 

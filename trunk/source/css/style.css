@@ -4,6 +4,19 @@ html, body
     padding:0;
     overflow:hidden;
 }
+    #stats
+    {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.69);
+        padding: 10px;
+        max-width: 500px;
+        word-break: break-all;
+        font-family: verdana;
+        font-size: 10px;
+        letter-spacing: -1px;
+    }
     #canvas-container 
     {
         position: absolute;

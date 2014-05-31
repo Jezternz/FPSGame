@@ -4,23 +4,28 @@
     {
 
         // Original code "AABB-triangle overlap test code by Tomas Akenine-Möller" //
-        triangleIntersectsAABB: function(triFace, aabb, cellSizes)
+        // http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox2.txt //
+
+        // Expected:
+        // completeAABB -> [xPos, yPos, zPos, xHalfSize, yHalfSize, zHalfSize];
+        // triangleVertices -> [[vertAX, vertAY, vertAZ], [vertBX, vertBY, vertBZ], [vertCX, vertCY, vertCZ]]
+        aabbIntersectsTriangle: function(completeAABB, triangleVertices)
         {
 
-            this.boxHalfSize = vec3.fromValues.apply(vec3, cellSizes.map(function(cS){ return cS / 2; }));
-
+            // Unfortunately have to convert to vec3's to perform math, maybe can work around this in future?
             var triVerts = [
-                vec3.fromValues(triFace[0][0], triFace[0][1], triFace[0][2]),
-                vec3.fromValues(triFace[1][0], triFace[1][1], triFace[1][2]),
-                vec3.fromValues(triFace[2][0], triFace[2][1], triFace[2][2])
+                vec3.fromValues(triangleVertices[0][0], triangleVertices[0][1], triangleVertices[0][2]),
+                vec3.fromValues(triangleVertices[1][0], triangleVertices[1][1], triangleVertices[1][2]),
+                vec3.fromValues(triangleVertices[2][0], triangleVertices[2][1], triangleVertices[2][2])
             ];
 
-            var aaBBActualPos = vec3.fromValues((aabb[0]*cellSizes[0])+this.boxHalfSize[0], (aabb[1]*cellSizes[1])+this.boxHalfSize[1], (aabb[2]*cellSizes[2])+this.boxHalfSize[2]);
-
             // move everything so that the boxcenter is in (0,0,0) //
-            this.v0 = vec3.subtract(vec3.create(), triVerts[0], aaBBActualPos);
-            this.v1 = vec3.subtract(vec3.create(), triVerts[1], aaBBActualPos);
-            this.v2 = vec3.subtract(vec3.create(), triVerts[2], aaBBActualPos);
+            var aabb = completeAABB.slice(0, 3);
+            this.v0 = vec3.subtract(vec3.create(), triVerts[0], aabb);
+            this.v1 = vec3.subtract(vec3.create(), triVerts[1], aabb);
+            this.v2 = vec3.subtract(vec3.create(), triVerts[2], aabb);
+
+            this.boxHalfSize = vec3.fromValues.apply(vec3, completeAABB.slice(3));
 
             this.min;
             this.max;
@@ -35,7 +40,7 @@
             this.e2 = vec3.create();
 
             // Now complete collisiom
-            var collision = this.triBoxOverlap();
+            var collision = this._triBoxOverlap();
 
             delete this.boxHalfSize;
 
@@ -58,7 +63,7 @@
             return collision;
         },
 
-        triBoxOverlap: function()
+        _triBoxOverlap: function()
         {
 
             //    use separating axis theorem to test overlap between triangle and box //
@@ -82,7 +87,7 @@
             this.fex = Math.abs(this.e0[0]);
             this.fey = Math.abs(this.e0[1]);
             this.fez = Math.abs(this.e0[2]);
-            if(this.AXISTEST_X01(this.e0[2], this.e0[1], this.fez, this.fey) === 0 || this.AXISTEST_Y02(this.e0[2], this.e0[0], this.fez, this.fex) === 0 || this.AXISTEST_Z12(this.e0[1], this.e0[0], this.fey, this.fex) === 0)
+            if(this._AXISTEST_X01(this.e0[2], this.e0[1], this.fez, this.fey) === 0 || this._AXISTEST_Y02(this.e0[2], this.e0[0], this.fez, this.fex) === 0 || this._AXISTEST_Z12(this.e0[1], this.e0[0], this.fey, this.fex) === 0)
             {
                 return 0;
             }
@@ -90,7 +95,7 @@
             this.fex = Math.abs(this.e1[0]);
             this.fey = Math.abs(this.e1[1]);
             this.fez = Math.abs(this.e1[2]);
-            if(this.AXISTEST_X01(this.e1[2], this.e1[1], this.fez, this.fey) === 0 || this.AXISTEST_Y02(this.e1[2], this.e1[0], this.fez, this.fex) === 0 || this.AXISTEST_Z0(this.e1[1], this.e1[0], this.fey, this.fex) === 0)
+            if(this._AXISTEST_X01(this.e1[2], this.e1[1], this.fez, this.fey) === 0 || this._AXISTEST_Y02(this.e1[2], this.e1[0], this.fez, this.fex) === 0 || this._AXISTEST_Z0(this.e1[1], this.e1[0], this.fey, this.fex) === 0)
             {
                 return 0;
             }
@@ -98,7 +103,7 @@
             this.fex = Math.abs(this.e2[0]);
             this.fey = Math.abs(this.e2[1]);
             this.fez = Math.abs(this.e2[2]);
-            if(this.AXISTEST_X2(this.e2[2], this.e2[1], this.fez, this.fey) === 0 || this.AXISTEST_Y1(this.e2[2], this.e2[0], this.fez, this.fex) === 0 || this.AXISTEST_Z12(this.e2[1], this.e2[0], this.fey, this.fex) === 0)
+            if(this._AXISTEST_X2(this.e2[2], this.e2[1], this.fez, this.fey) === 0 || this._AXISTEST_Y1(this.e2[2], this.e2[0], this.fez, this.fex) === 0 || this._AXISTEST_Z12(this.e2[1], this.e2[0], this.fey, this.fex) === 0)
             {
                 return 0;
             }
@@ -130,13 +135,13 @@
             vec3.cross(this.normal,this.e0,this.e1);
 
             // -NJMP- (line removed here)
-            if(!this.planeBoxOverlap()) return 0;    // -NJMP-
+            if(!this._planeBoxOverlap()) return 0;    // -NJMP-
 
             return 1;   // box and triangle overlaps //
 
         },
 
-        planeBoxOverlap: function()    // -NJMP-
+        _planeBoxOverlap: function()    // -NJMP-
         {
           var vmin=vec3.create(),vmax=vec3.create(),v;
           for(var q=0;q<=2;q++)
@@ -160,7 +165,7 @@
 
         //======================== 0-tests ========================//
 
-        AXISTEST_X01: function(a, b, fa, fb)
+        _AXISTEST_X01: function(a, b, fa, fb)
         {
             var p0 = a*this.v0[1] - b*this.v0[2];
             var p2 = a*this.v2[1] - b*this.v2[2];
@@ -169,7 +174,7 @@
             return (this.min>this.rad || this.max<-this.rad) ? 0 : 1;
         },
 
-        AXISTEST_X2: function(a, b, fa, fb)
+        _AXISTEST_X2: function(a, b, fa, fb)
         {
             var p0 = a*this.v0[1] - b*this.v0[2];
             var p1 = a*this.v1[1] - b*this.v1[2];
@@ -181,7 +186,7 @@
 
         //======================== 1-tests ========================//
 
-        AXISTEST_Y02: function(a, b, fa, fb)
+        _AXISTEST_Y02: function(a, b, fa, fb)
         {
             var p0 = -a*this.v0[0] + b*this.v0[2];
             var p2 = -a*this.v2[0] + b*this.v2[2];
@@ -190,7 +195,7 @@
             return (this.min>this.rad || this.max<-this.rad) ? 0 : 1;
         },
 
-        AXISTEST_Y1: function(a, b, fa, fb)
+        _AXISTEST_Y1: function(a, b, fa, fb)
         {
             var p0 = -a*this.v0[0] + b*this.v0[2];
             var p1 = -a*this.v1[0] + b*this.v1[2];
@@ -201,7 +206,7 @@
 
         //======================== 2-tests ========================//
 
-        AXISTEST_Z12: function(a, b, fa, fb)
+        _AXISTEST_Z12: function(a, b, fa, fb)
         {
             var p1 = a*this.v1[0] - b*this.v1[1];
             var p2 = a*this.v2[0] - b*this.v2[1];
@@ -210,7 +215,7 @@
             return (this.min>this.rad || this.max<-this.rad) ? 0 : 1;
         },
 
-        AXISTEST_Z0: function(a, b, fa, fb)
+        _AXISTEST_Z0: function(a, b, fa, fb)
         {
             var p0 = a*this.v0[0] - b*this.v0[1];
             var p1 = a*this.v1[0] - b*this.v1[1];
