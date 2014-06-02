@@ -44,6 +44,12 @@
             {
                 this._program.player.actions.movement.run = true;
             }
+
+            if(this._program.events.keyPressed['m'] || this._program.events.keyDown['n'])
+            {
+                this._program.player.actions.continueProcessingInput = true;
+            }
+
         },
 
         tickLook: function ()

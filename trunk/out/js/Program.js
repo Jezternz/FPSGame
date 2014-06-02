@@ -8,6 +8,8 @@
 
         _tickTime: 0,
 
+        _debuggingActive: false,
+
         imagesDirectory: "textures/",
 
         screen:
@@ -41,7 +43,7 @@
                 .then(function()
                 {
                     console.log("Setup Complete, Game running...");
-                })
+                }.bind(this))
                 .catch(console.error.bind(console));
         },
 

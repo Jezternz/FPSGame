@@ -17,7 +17,7 @@
 
         _PI_2: (Math.PI / 2),
 
-        _gravityAcceleration: 0.005,
+        _gravityAcceleration: 0.05,
 
         // Defaults must be set in resetActions()
         actions:
@@ -53,7 +53,9 @@
 
             this._program.renderer.threeScene.add(this._yawObject);
 
+            this._yawObject.translateX(0);
             this._yawObject.translateY(100);
+            this._yawObject.translateZ(0);
 
             this.resetActions();
         },
@@ -62,7 +64,6 @@
         {
             // delta is the time passed, movement needs to be multiplied by the time passed, as the times for each tick can be inconsistent, however movement must remain consistent
             this._delta = tickTime * 0.1;
-
             this.computeNextPosition(tickTime);
             this.testCollisions();
             this.resolveCollisions();
@@ -81,9 +82,9 @@
             this._lookVelocity.x = (this.actions.look.y === 0) ? 0 : -(this.actions.look.y * 0.002);
 
             // Process movement
-            if (this.actions.movement.jump /*&& this._yawObject.position.y === this._minPlayerHeight*/)
+            if (this.actions.movement.jump)
             {
-                this._velocity.y += 0.03;
+                this._velocity.y += 0.18;
             }
 
             if (this.actions.movement.forward)
@@ -104,16 +105,23 @@
             }
         },
 
+        calculateCollisions: function(positionOnly)
+        {
+
+            var clone = this._yawObject.clone();
+            clone.translateY(this._velocity.y);
+            clone.translateX(this._velocity.x);
+            clone.translateZ(this._velocity.z);
+            var newPos = [clone.position.x, clone.position.y, clone.position.z];
+            var halfSizes = [10, 30, 10];
+            // PosX PosX2 PosY PosY2 PosZ PosZ2
+            var playerAABB = [newPos[0]-halfSizes[0], newPos[0]+halfSizes[0], newPos[1]-halfSizes[1], newPos[1]+halfSizes[1], newPos[2]-halfSizes[2], newPos[2]+halfSizes[2]];
+            return this._program.physics.calculateAABBAgainstGeometryCollisions(playerAABB);
+        },
+
         testCollisions: function()
         {
-            this._collisions.length = 0;
-
-            var newPos = [this._yawObject.position.x+this._velocity.x, this._yawObject.position.y+this._velocity.y, this._yawObject.position.z+this._velocity.z];
-            var size = [20, 60, 20].map(function(r){ return r/2; });
-            // PosX PosX2 PosY PosY2 PosZ PosZ2
-            var playerAABB = [newPos[0]-size[0], newPos[0]+size[0], newPos[1]-size[1], newPos[1]+size[1], newPos[2]-size[2], newPos[2]+size[2]];
-
-            this._collisions = this._program.physics.calculateAABBAgainstGeometryCollisions(playerAABB);
+            this._collisions = this.calculateCollisions();
 
             if(this._yawObject.position.y+this._velocity.y<-400)
             {
@@ -125,13 +133,11 @@
         {
 
             // Update _yawObject based on _velocity changes
+            this._pitchObject.rotation.x = Math.max(-this._PI_2, Math.min(this._PI_2, (this._pitchObject.rotation.x + this._lookVelocity.x)));
+            this._yawObject.rotation.y += this._lookVelocity.y;
 
             if(this._collisions.length === 0)
-            {
-                this._yawObject.rotation.y += this._lookVelocity.y;
-                this._pitchObject.rotation.x += this._lookVelocity.x;
-                this._pitchObject.rotation.x = Math.max(-this._PI_2, Math.min(this._PI_2, this._pitchObject.rotation.x));
-                
+            {                
                 this._yawObject.translateY(this._velocity.y);
                 this._yawObject.translateX(this._velocity.x);
                 this._yawObject.translateZ(this._velocity.z);
@@ -142,7 +148,6 @@
                 this._velocity.y = 0;
                 this._velocity.z = 0;
             }
-
         },
 
         resetActions: function ()
@@ -157,7 +162,7 @@
             this.actions.look.y = 0;
         },
 
-        getPosition: function (vec3)
+        getPosition: function (tvec3)
         {
             vec3 = tvec3 || new THREE.Vector3();
             var rotation = new THREE.Euler(0, 0, 0, "YXZ");

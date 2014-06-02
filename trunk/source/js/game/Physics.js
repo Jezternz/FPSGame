@@ -3,8 +3,6 @@
     window.Physics = WrapClass(
     {
 
-        _renderHitboxes: true,
-
         _maxGridSize: 30,
         _program: false,
 
@@ -37,7 +35,7 @@
             {
                 this._program.jsonLoader.load( "models/level.js", function( geometry ) {
                     this.setupPhysicsEngine(geometry);
-                    if(this._renderHitboxes)
+                    if(this._program._debuggingActive)
                     {
                         this.addHitboxRendering();
                     }
@@ -113,7 +111,10 @@
                 }
             }
 
-            this.addUserHitBoxRendering(aabb, cellAABB, rAr, checks, collisions);
+            if(this._program._debuggingActive)
+            {                
+                this.addUserHitBoxRendering(aabb, cellAABB, rAr, checks, collisions);
+            }
 
             return collisions;
 
@@ -131,13 +132,16 @@
             {
                 this.rAr.forEach(function(box){ this._program.renderer.threeScene.remove(box); }.bind(this));
             }
-            document.querySelector("#stats").innerHTML = 
+
+            Stats.update("physics", (
                 "CellSize:<br />" + this.cellSize + "<br /><br />" +
                 "OriginalAABB<br />" + playerAABB.join(", ") + "<br /><br />"+
                 "CellsAABB:<br />" + playerCellsAABB.join(", ") + "<br /><br />" +
                 "OverlappingCellsList:<br />" + overlappingCells.join(", ") + "<br /><br />" +
                 "PossibleOverlappingFaceList (" + overlappingFaces.length + "):<br />" + overlappingFaces.join(", ") + "<br /><br />" +
-                "ActualOverlappingFaceList (" + actualCollisionFaces.length + "):<br />" + actualCollisionFaces.join(", ");
+                "ActualOverlappingFaceList (" + actualCollisionFaces.length + "):<br />" + actualCollisionFaces.join(", ")
+            ));
+
             if(typeof this.statsListenerSet==="undefined")
             {
                 document.addEventListener("keydown", function(evt){ 
