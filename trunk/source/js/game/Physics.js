@@ -44,9 +44,12 @@
             }.bind(this));
         },
 
-        calculateAABBAgainstGeometryCollisions: function(aabb)
+        computePlayerMovement: function(currentPosition, futurePosition, halfSizes)
         {
             // NEED TO GO ACROSS ALL AABB's at some point and make them consistent. -- Make them Float32Ar ?
+
+
+            var aabb = [futurePosition[0]-halfSizes[0], futurePosition[0]+halfSizes[0], futurePosition[1]-halfSizes[1], futurePosition[1]+halfSizes[1], futurePosition[2]-halfSizes[2], futurePosition[2]+halfSizes[2]];
 
             var
                 name,
@@ -116,7 +119,7 @@
                 this.addUserHitBoxRendering(aabb, cellAABB, rAr, checks, collisions);
             }
 
-            return collisions;
+            return collisions.length > 0 ? currentPosition : futurePosition;
 
         },
 

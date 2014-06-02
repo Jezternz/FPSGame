@@ -65,7 +65,6 @@
             // delta is the time passed, movement needs to be multiplied by the time passed, as the times for each tick can be inconsistent, however movement must remain consistent
             this._delta = tickTime * 0.1;
             this.computeNextPosition(tickTime);
-            this.testCollisions();
             this.resolveCollisions();
 
         },
@@ -105,20 +104,6 @@
             }
         },
 
-        calculateCollisions: function(positionOnly)
-        {
-
-            var clone = this._yawObject.clone();
-            clone.translateY(this._velocity.y);
-            clone.translateX(this._velocity.x);
-            clone.translateZ(this._velocity.z);
-            var newPos = [clone.position.x, clone.position.y, clone.position.z];
-            var halfSizes = [10, 30, 10];
-            // PosX PosX2 PosY PosY2 PosZ PosZ2
-            var playerAABB = [newPos[0]-halfSizes[0], newPos[0]+halfSizes[0], newPos[1]-halfSizes[1], newPos[1]+halfSizes[1], newPos[2]-halfSizes[2], newPos[2]+halfSizes[2]];
-            return this._program.physics.calculateAABBAgainstGeometryCollisions(playerAABB);
-        },
-
         testCollisions: function()
         {
             this._collisions = this.calculateCollisions();
@@ -132,14 +117,27 @@
         resolveCollisions: function()
         {
 
-            // Update _yawObject based on _velocity changes
+            // Create an Object3D Clone to work out future position
+            var clone = this._yawObject.clone();
+            clone.translateX(this._velocity.x);
+            clone.translateY(this._velocity.y);
+            clone.translateZ(this._velocity.z);
+
+            // Calculate new location
+            var currentPosition = [this._yawObject.position.x, this._yawObject.position.y, this._yawObject.position.z];
+            var futurePosition = [clone.position.x, clone.position.y, clone.position.z];
+            var halfSizes = [10, 30, 10];
+            var collidedFuturePosition = this._program.physics.computePlayerMovement(currentPosition, futurePosition, halfSizes);
+
+            // Update (Camera look) _yawObject based on _velocity changes
             this._pitchObject.rotation.x = Math.max(-this._PI_2, Math.min(this._PI_2, (this._pitchObject.rotation.x + this._lookVelocity.x)));
             this._yawObject.rotation.y += this._lookVelocity.y;
 
-            if(this._collisions.length === 0)
-            {                
-                this._yawObject.translateY(this._velocity.y);
+
+            if(JSON.stringify(currentPosition) !== JSON.stringify(collidedFuturePosition))
+            {
                 this._yawObject.translateX(this._velocity.x);
+                this._yawObject.translateY(this._velocity.y);
                 this._yawObject.translateZ(this._velocity.z);
             }
             else
@@ -148,6 +146,28 @@
                 this._velocity.y = 0;
                 this._velocity.z = 0;
             }
+
+            // Update X Axis, if there were changes
+            /*this._velocity.x = collidedFuturePosition[0] - currentPosition[0];
+            if(this._velocity.x !== 0)
+            {
+                this._yawObject.translateX(this._velocity.x);
+            }
+
+            // Update Y Axis, if there were changes
+            this._velocity.y = collidedFuturePosition[1] - currentPosition[1];
+            if(this._velocity.y !== 0)
+            {
+                this._yawObject.translateY(this._velocity.y);
+            }
+
+            // Update Z Axis, if there were changes
+            this._velocity.z = collidedFuturePosition[2] - currentPosition[2];
+            if(this._velocity.z !== 0)
+            {
+                this._yawObject.translateZ(this._velocity.z);
+            }*/
+
         },
 
         resetActions: function ()
