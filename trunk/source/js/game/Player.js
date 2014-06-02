@@ -133,40 +133,14 @@
             this._pitchObject.rotation.x = Math.max(-this._PI_2, Math.min(this._PI_2, (this._pitchObject.rotation.x + this._lookVelocity.x)));
             this._yawObject.rotation.y += this._lookVelocity.y;
 
+            if(currentPosition[0] !== collidedFuturePosition[0])this._yawObject.translateX(this._velocity.x);
+            else this._velocity.x = 0;
 
-            if(JSON.stringify(currentPosition) !== JSON.stringify(collidedFuturePosition))
-            {
-                this._yawObject.translateX(this._velocity.x);
-                this._yawObject.translateY(this._velocity.y);
-                this._yawObject.translateZ(this._velocity.z);
-            }
-            else
-            {
-                this._velocity.x = 0;
-                this._velocity.y = 0;
-                this._velocity.z = 0;
-            }
+            if(currentPosition[1] !== collidedFuturePosition[1])this._yawObject.translateY(this._velocity.y);
+            else this._velocity.y = 0;
 
-            // Update X Axis, if there were changes
-            /*this._velocity.x = collidedFuturePosition[0] - currentPosition[0];
-            if(this._velocity.x !== 0)
-            {
-                this._yawObject.translateX(this._velocity.x);
-            }
-
-            // Update Y Axis, if there were changes
-            this._velocity.y = collidedFuturePosition[1] - currentPosition[1];
-            if(this._velocity.y !== 0)
-            {
-                this._yawObject.translateY(this._velocity.y);
-            }
-
-            // Update Z Axis, if there were changes
-            this._velocity.z = collidedFuturePosition[2] - currentPosition[2];
-            if(this._velocity.z !== 0)
-            {
-                this._yawObject.translateZ(this._velocity.z);
-            }*/
+            if(currentPosition[2] !== collidedFuturePosition[2])this._yawObject.translateZ(this._velocity.z);
+            else this._velocity.z = 0;
 
         },
 
@@ -180,15 +154,6 @@
             this.actions.movement.run = false;
             this.actions.look.x = 0;
             this.actions.look.y = 0;
-        },
-
-        getPosition: function (tvec3)
-        {
-            vec3 = tvec3 || new THREE.Vector3();
-            var rotation = new THREE.Euler(0, 0, 0, "YXZ");
-            rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
-            vec3.copy(new THREE.Vector3(0, 0, -1)).applyEuler(rotation);
-            return vec3;
         }
 
 
