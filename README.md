@@ -2,7 +2,9 @@
 
 <img src="https://raw.githubusercontent.com/Jezternz/FPSGame/master/trunk/source/screenshot.png" height="200" >
 
-This is a small WebGL based First Person Shooter (FPS) game prototype I started playing around with - losely based on various examples and hacks. Feel free to strip what you want from it or improve upon it. I was hoping to make it a simple multiplayer game with a single weapon, but did not get that far.
+This was a small side-project I did a bit of work on, basically combining different examples and hacks to build a basic First Person Shooter (FPS) game in webgl, in its current state the collision needs a rewrite.
+
+Feel free to strip what you want from it or improve upon it. I was hoping to make it a simple multiplayer game with a single weapon, and may still if I get time.
 
 ### Installation
 * Checkout this repo
